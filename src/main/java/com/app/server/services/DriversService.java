@@ -2,8 +2,6 @@ package com.app.server.services;
 
 import com.app.server.models.Driver;
 import com.app.server.util.MongoPool;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -41,18 +39,7 @@ public class DriversService {
             return driverList;
         }
         for (Document item : results) {
-            Driver driver = new Driver(
-                    item.getString("firstName"),
-                    item.getString("middleName"),
-                    item.getString("lastName"),
-                    item.getString("address1"),
-                    item.getString("address2"),
-                    item.getString("city"),
-                    item.getString("state"),
-                    item.getString("country"),
-                    item.getString("postalCode")
-            );
-            driver.setId(item.getObjectId("_id").toString());
+            Driver driver = convertDocumentToDriver(item);
             driverList.add(driver);
         }
         return driverList;
@@ -67,40 +54,20 @@ public class DriversService {
         if (item == null) {
             return  null;
         }
-        Driver driver = new Driver(
-                item.getString("firstName"),
-                item.getString("middleName"),
-                item.getString("lastName"),
-                item.getString("address1"),
-                item.getString("address2"),
-                item.getString("city"),
-                item.getString("state"),
-                item.getString("country"),
-                item.getString("postalCode")
-        );
-        driver.setId(item.getObjectId("_id").toString());
-        return driver;
+        return  convertDocumentToDriver(item);
     }
 
-    public Object create(JSONObject obj) {
+    public Object create(Driver driver) {
         try {
-            Document doc = new Document("firstName", obj.getString("firstName"))
-                    .append("middleName", obj.getString("middleName"))
-                    .append("lastName", obj.getString("lastName"))
-                    .append("address1", obj.getString("address1"))
-                    .append("address2", obj.getString("address2"))
-                    .append("city", obj.getString("city"))
-                    .append("state", obj.getString("state"))
-                    .append("country", obj.getString("country"))
-                    .append("postalCode", obj.getString("postalCode"));
-
+            Document doc = convertDriverToDocument(driver);
             driversCollection.insertOne(doc);
+            ObjectId id = (ObjectId)doc.get( "_id" );
+            driver.setId(id.toString());
 
         } catch(JSONException e) {
             System.out.println("Failed to create a document");
-
         }
-        return obj;
+        return driver;
     }
 
 
@@ -151,6 +118,35 @@ public class DriversService {
         driversCollection.deleteOne(query);
 
         return new JSONObject();
+    }
+
+    private Driver convertDocumentToDriver(Document item) {
+        Driver driver = new Driver(
+                item.getString("firstName"),
+                item.getString("middleName"),
+                item.getString("lastName"),
+                item.getString("address1"),
+                item.getString("address2"),
+                item.getString("city"),
+                item.getString("state"),
+                item.getString("country"),
+                item.getString("postalCode")
+        );
+        driver.setId(item.getObjectId("_id").toString());
+        return driver;
+    }
+
+    private Document convertDriverToDocument(Driver driver){
+        Document doc = new Document("firstName", driver.getFirstName())
+                .append("middleName", driver.getMiddleName())
+                .append("lastName", driver.getLastName())
+                .append("address1", driver.getAddress1())
+                .append("address2", driver.getAddress2())
+                .append("city", driver.getCity())
+                .append("state", driver.getState())
+                .append("country", driver.getCountry())
+                .append("postalCode", driver.getPostalCode());
+        return doc;
     }
 
 

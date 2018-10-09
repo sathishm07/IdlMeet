@@ -35,7 +35,7 @@ public class MongoPool {
         }
         return mp;
     }
-    public static MongoCollection<Document> getCollection(String collectionName){
+    public MongoCollection<Document> getCollection(String collectionName){
         return db.getCollection(collectionName);
     }
 }
