@@ -17,3 +17,9 @@ be run as a class.
 Note that all code in this repository is rudimentary and provide you a starting point for 
 the class material.
 
+## Compatibility
+
+* JDK 1.8
+* Tomcat 8.5 or 9
+
+
