@@ -10,13 +10,15 @@ import org.bson.Document;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MongoPool {
+public class MongoPool
+{
 
     private static MongoPool mp;
     private static MongoDatabase db;
 
 
-    private MongoPool() {
+    private MongoPool()
+    {
         MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
         //build the connection options
         builder.maxConnectionIdleTime(60000);//set the max wait time in (ms)
@@ -25,17 +27,20 @@ public class MongoPool {
         MongoClientOptions opts = builder.build();
 
         MongoClient mc = new MongoClient(new ServerAddress());
-        db =mc.getDatabase("app");
+        db =mc.getDatabase("IdlMeet");
         Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
     }
 
-    public static MongoPool getInstance(){
-        if(mp == null){
+    public static MongoPool getInstance()
+    {
+        if(mp == null)
+        {
             mp = new MongoPool();
         }
         return mp;
     }
-    public MongoCollection<Document> getCollection(String collectionName){
+    public MongoCollection<Document> getCollection(String collectionName)
+    {
         return db.getCollection(collectionName);
     }
 }

@@ -1,9 +1,11 @@
 package com.app.server.http;
 
+import com.app.server.http.exceptions.APPInternalServerException;
+import com.app.server.http.exceptions.APPNotFoundException;
 import com.app.server.http.utils.APPResponse;
 import com.app.server.http.utils.PATCH;
-import com.app.server.models.Driver;
-import com.app.server.services.DriversService;
+import com.app.server.models.Connection;
+import com.app.server.services.ConnectionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -15,20 +17,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 
-@Path("drivers")
+@Path("connections")
 
-public class DriversHttpService {
-    private DriversService service;
+public class ConnectionHttpService {
+    private ConnectionService service;
     private ObjectWriter ow;
 
-
-    public DriversHttpService() {
-        service = DriversService.getInstance();
+    public ConnectionHttpService() {
+        service = ConnectionService.getInstance();
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-
     }
-
-
 
     @OPTIONS
     @PermitAll
@@ -45,34 +43,45 @@ public class DriversHttpService {
     }
 
     @GET
-    @Path("{id}")
+    @Path("{connectionId}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
-
-        return new APPResponse(service.getOne(id));
+    public APPResponse getOne(@PathParam("connectionId") String id) {
+        try {
+            Connection d = service.getOne(id);
+            if (d == null)
+                throw new APPNotFoundException(56,"Connection not found");
+            return new APPResponse(d);
+        }
+        catch(IllegalArgumentException e){
+            throw new APPNotFoundException(56,"Connection not found");
+        }
+        catch (Exception e) {
+            throw new APPInternalServerException(0,"Something happened. Come back later.");
+        }
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
     public APPResponse create(Object request) {
-            return new APPResponse(service.create(request));
+
+        return new APPResponse(service.create(request));
     }
 
     @PATCH
-    @Path("{id}")
+    @Path("{connectionId}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request){
+    public APPResponse update(@PathParam("connectionId") String id, Object request){
 
         return new APPResponse(service.update(id,request));
 
     }
 
     @DELETE
-    @Path("{id}")
+    @Path("{connectionId}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse delete(@PathParam("id") String id) {
+    public APPResponse delete(@PathParam("connectionId") String id) {
 
         return new APPResponse(service.delete(id));
     }
